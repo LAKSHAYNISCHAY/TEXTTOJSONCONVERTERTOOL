@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Converter Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .instructions {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-left: 5px solid #007BFF;
+            border-radius: 4px;
+            color: #333;
+            max-height: 200px; /* Set maximum height */
+            overflow-y: auto; /* Add scroll if needed */
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            font-size: 16px;
+            resize: vertical;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #007BFF;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar span {
+            display: block;
+            height: 100%;
+            width: 0;
+            background: #28a745;
+            transition: width 0.3s;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .result-box pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+        }
+        .error-message {
+            color: #dc3545;
+            margin-top: 10px;
+        }
+        .copy-button {
+            background: #28a745;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: auto;
+        }
+        .copy-button:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JSON Conversion Tool</h1>
+        <div class="instructions">
+            <p><strong>Instructions:</strong></p>
+            <p>Paste your text in the format below:</p>
+            <pre>
+Question 37:
+The programming language 'C++' was developed by Bjarne Stroustrup at AT&T Bell Laboratories in the early _____ decade.
+ * (a) 1980
+ * (b) 1990
+ * (c) 1960
+ * (d) 1970
+Correct Answer: (a) 1980
+Explanation: C++ was developed in the early 1980s.
+
+Question 38:
+A collection of interrelated files and a set of programs that allow users to access and modify these files is called:
+ * (a) Data Analytical System
+ * (b) Database Management System
+ * (c) Data Files
+ * (d) System Management
+Correct Answer: (b) Database Management System
+Explanation: A database management system (DBMS) is software used to manage databases.
+            </pre>
+            <p>Each question must include:</p>
+            <ul>
+                <li>Question text</li>
+                <li>At least four options (a-d)</li>
+                <li>Correct answer</li>
+                <li>Explanation</li>
+            </ul>
+            <p>Ensure that each question block has at least 4 lines. The format should be consistent for proper conversion.</p>
+        </div>
+        <textarea id="jsonInput" placeholder="Paste your text here..."></textarea>
+        <button onclick="processInput()">Convert to JSON</button>
+        <div class="progress-bar" id="progressBar">
+            <span id="progress"></span>
+        </div>
+        <div class="result-box" id="resultBox">
+            <h2>Converted JSON:</h2>
+            <pre id="jsonOutput"></pre>
+            <button class="copy-button" onclick="copyToClipboard()">Copy All</button>
+        </div>
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <script>
+        function updateProgressBar(percentage) {
+            const progressBar = document.getElementById('progressBar');
+            const progressSpan = document.getElementById('progress');
+            progressBar.style.display = 'block';
+            progressSpan.style.width = percentage + '%';
+        }
+
+        function processInput() {
+            const inputText = document.getElementById('jsonInput').value.trim();
+            const errorMessage = document.getElementById('errorMessage');
+            const resultBox = document.getElementById('resultBox');
+            const jsonOutput = document.getElementById('jsonOutput');
+
+            errorMessage.textContent = '';
+            resultBox.style.display = 'none';
+            updateProgressBar(0);
+
+            if (inputText === '') {
+                errorMessage.textContent = 'Input cannot be empty!';
+                return;
+            }
+
+            // Simulate processing time
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                updateProgressBar(progress);
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    try {
+                        let convertedJSON = convertTextToJSON(inputText);
+                        jsonOutput.textContent = JSON.stringify(convertedJSON, null, 2);
+                        resultBox.style.display = 'block';
+                    } catch (e) {
+                        errorMessage.textContent = 'Error in JSON conversion: ' + e.message;
+                    }
+                    updateProgressBar(100);
+                }
+            }, 100);
+        }
+
+        function convertTextToJSON(text) {
+            let questions = [];
+            let questionBlock = [];
+            const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                if (line.startsWith('Question')) {
+                    if (questionBlock.length > 0) {
+                        if (questionBlock.length >= 4) {
+                            let question = questionBlock[0];
+                            let options = questionBlock.slice(1, -2);
+                            let answer = questionBlock[questionBlock.length - 2];
+                            let explanation = questionBlock[questionBlock.length - 1];
+                            questions.push({
+                                question: question,
+                                options: options,
+                                answer: answer,
+                                explanation: explanation
+                            });
+                        } else {
+                            throw new Error('Each question block must have at least 4 lines.');
+                        }
+                        questionBlock = [];
+                    }
+                }
+                questionBlock.push(line);
+            }
+
+            // Process last question block if any
+            if (questionBlock.length >= 4) {
+                let question = questionBlock[0];
+                let options = questionBlock.slice(1, -2);
+                let answer = questionBlock[questionBlock.length - 2];
+                let explanation = questionBlock[questionBlock.length - 1];
+                questions.push({
+                    question: question,
+                    options: options,
+                    answer: answer,
+                    explanation: explanation
+                });
+            }
+
+            if (questions.length === 0) throw new Error('No valid questions found.');
+            return { questions };
+        }
+
+        function copyToClipboard() {
+            const jsonOutput = document.getElementById('jsonOutput').textContent;
+            navigator.clipboard.writeText(jsonOutput).then(() => {
+                alert('Copied to clipboard!');
+            }, (err) => {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
